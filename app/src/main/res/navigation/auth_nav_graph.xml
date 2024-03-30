@@ -13,7 +13,7 @@
         <action
             android:id="@+id/action_splashFragment_to_chooseAuthFragment"
             app:destination="@id/chooseAuthFragment"
-            app:popUpTo="@id/chooseAuthFragment"
+            app:popUpTo="@id/splashFragment"
             app:popUpToInclusive="true" />
     </fragment>
     <fragment

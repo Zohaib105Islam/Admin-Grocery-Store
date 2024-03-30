@@ -29,4 +29,17 @@
         app:menu="@menu/bottom_menu"
         app:itemIconTint="@drawable/bottom_menu_item_color"/>
 
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/crashButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Crash"
+        android:background="@drawable/btn_design"
+        android:textAllCaps="false"
+        android:textColor="@color/white"
+        android:visibility="visible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/fragmentContainer" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

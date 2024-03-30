@@ -4,6 +4,7 @@ import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
+import android.os.Looper
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -94,23 +95,38 @@ private val viewModel: AuthViewModel by viewModels()
         val email= binding.loginEmail1.text.toString()
         val password= binding.loginPass1.text.toString()
 
-        viewModel.apply {
-            signInWithEmail(email, password)
-            lifecycleScope.launch {
-                isSignInSuccessfully.apply {
-                    if (true){
-                        Utils.showToast(requireContext(),"Signin Succesfully...")
-                        startActivity(Intent(requireActivity(), MainActivity::class.java))
-                        requireActivity().finish()
-                    }
-                    else{
-                        Utils.showToast(requireContext(),"Signin Error...")
-                    }
-                }
+        if (email.isEmpty()){
+            binding.loginEmail1.error="Enter email"
+             binding.loginPass1.error="Enter password"
+        }
+        else if (password.isEmpty()){
+            binding.loginPass1.error="Enter password"
+        }
+        else{
+            Utils.showDialog(requireContext(),"Signing in...")
 
+            viewModel.apply {
+                signInWithEmail(email, password)
+                lifecycleScope.launch {
+                    isSignInSuccessfully.apply {
+                        if (true){
+                            Handler(Looper.getMainLooper()).postDelayed(Runnable{
+                                Utils.hideDialog()
+                                Utils.showToast(requireContext(),"Signin Succesfully...")
+                                startActivity(Intent(requireActivity(), MainActivity::class.java))
+                                requireActivity().finish()
+                            },2000)
+
+                        }
+                        else{
+                            Utils.hideDialog()
+                            Utils.showToast(requireContext(),"Signin Error...")
+                        }
+                    }
+
+                }
             }
         }
-
 
     }
 

@@ -19,6 +19,11 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
+        binding.crashButton.setOnClickListener {
+            throw RuntimeException("Test Crash") // Force a crash
+        }
+
+
         NavigationUI.setupWithNavController(binding.menuItem , Navigation.findNavController(this , R.id.fragmentContainer))
     }
 }

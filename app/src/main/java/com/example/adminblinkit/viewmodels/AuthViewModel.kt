@@ -10,6 +10,7 @@ import com.example.adminblinkit.models.Users
 import com.example.adminblinkit.utils.Utils
 import com.google.firebase.FirebaseException
 import com.google.firebase.FirebaseTooManyRequestsException
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthMissingActivityForRecaptchaException
 import com.google.firebase.auth.PhoneAuthCredential
@@ -22,27 +23,33 @@ import java.util.concurrent.TimeUnit
 
 class AuthViewModel() : ViewModel() {
 
+    private val auth : FirebaseAuth=FirebaseAuth.getInstance()
+
     private var _verficationId = MutableStateFlow<String?>(null)
-    private var _otpSent = MutableLiveData(false)
+    private var _otpSent = MutableStateFlow(false)
     var otpSend = _otpSent
 
-    private var _isSignInSuccessfully = MutableLiveData(false)
-    var isSignInSuccessfully=_isSignInSuccessfully
+    private var _isSignInSuccessfully = MutableStateFlow(false)
+    val isSignInSuccessfully = _isSignInSuccessfully
 
     private var _isPasswordReset = MutableLiveData(false)
     var isPasswordReset = _isPasswordReset
 
-    private var _isCurrentUser= MutableStateFlow(false)
-    var isCurrentUser=_isCurrentUser
+    private var _isCurrentUser = MutableStateFlow(false)
+    var isCurrentUser = _isCurrentUser
 
     init {
-        Utils.getAuthInstance().currentUser?.let {
-            isCurrentUser.value=true
+        if (Utils.getAuthInstance().currentUser != null){
+            isCurrentUser.value = true
         }
+//        Utils.getAuthInstance().currentUser?.let {
+//            isCurrentUser.value = true
+//        }
+
     }
 
     // For Phone Authentication===========================
-    fun sendOTP(userNumber: String, activity: Activity){
+    fun sendOTP(userNumber: String, activity: Activity) {
 
         val callbacks = object : PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
 
@@ -78,8 +85,6 @@ class AuthViewModel() : ViewModel() {
         }
 
 
-
-
         val options = PhoneAuthOptions.newBuilder(Utils.getAuthInstance())
             .setPhoneNumber(userNumber) // Phone number to verify
             .setTimeout(60L, TimeUnit.SECONDS) // Timeout and unit
@@ -91,37 +96,38 @@ class AuthViewModel() : ViewModel() {
 
 
     fun signInWithPhoneAuthCredential(otp: String, userNumber: String, users: Admin) {
-        val credential = PhoneAuthProvider.getCredential(_verficationId.value.toString(),otp)
+        val credential = PhoneAuthProvider.getCredential(_verficationId.value.toString(), otp)
 
-        FirebaseMessaging.getInstance().token.addOnCompleteListener{task->
-            val token=task.result
-            users.adminToken=token
+        FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
+            val token = task.result
+            users.adminToken = token
 
-        Utils.getAuthInstance().signInWithCredential(credential)
-            .addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    users.uid=Utils.currentUser()
-                    FirebaseDatabase.getInstance().getReference("Admins")
-                        .child(Utils.currentUser()!!).child("AdminInfo").setValue(users)
-                    _isSignInSuccessfully.value=true
+            Utils.getAuthInstance().signInWithCredential(credential)
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        users.uid = Utils.currentUser()
+                        FirebaseDatabase.getInstance().getReference("Admins")
+                            .child(Utils.currentUser()!!).child("AdminInfo").setValue(users)
+                        _isSignInSuccessfully.value = true
 
+                    }
                 }
-            }
-    }
+        }
     }
 
 
     // For Email Authentication===========================
 
-    fun createUserWithEmail(email: String, password: String, users: Users) {
 
-        FirebaseMessaging.getInstance().token.addOnCompleteListener{task->
-            val token=task.result
-            users.adminToken=token
 
-            Utils.getAuthInstance().createUserWithEmailAndPassword(email, password)
-                .addOnCompleteListener { task ->
-                    if (task.isSuccessful) {
+    suspend fun createUserWithEmail(email: String, password: String, users: Users) {
+
+        FirebaseMessaging.getInstance().token.addOnCompleteListener{
+            users.adminToken=it.result
+
+            auth.createUserWithEmailAndPassword(email, password)
+                .addOnCompleteListener {
+                    if (it.isSuccessful) {
                         users.uid=Utils.currentUser()
                         // Sign in success, update UI with the signed-in user's information
                         FirebaseDatabase.getInstance().getReference("Admins")
@@ -131,17 +137,17 @@ class AuthViewModel() : ViewModel() {
 
                     } else {
                         // If sign in fails, display a message to the user.
-                        Log.w(ContentValues.TAG, "createUserWithEmail:failure", task.exception)
+                        Log.w(ContentValues.TAG, "createUserWithEmail:failure", it.exception)
 
                     }
                 }
-
         }
     }
 
+
     fun signInWithEmail(email: String, password: String) {
 
-        Utils.getAuthInstance().signInWithEmailAndPassword(email, password)
+        auth.signInWithEmailAndPassword(email, password)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     // Sign in success, update UI with the signed-in user's information
@@ -150,17 +156,19 @@ class AuthViewModel() : ViewModel() {
 
 
                 } else {
+                    _isSignInSuccessfully.value = false
                     // If sign in fails, display a message to the user.
                     Log.w(ContentValues.TAG, "signInWithEmail:failure", task.exception)
 
                 }
             }
 
+
     }
 
 
     fun resetPassword(email: String) {
-        Utils.getAuthInstance().sendPasswordResetEmail(email)
+        auth.sendPasswordResetEmail(email)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     // Password reset email sent successfully
@@ -174,3 +182,8 @@ class AuthViewModel() : ViewModel() {
     }
 
 }
+
+
+
+
+

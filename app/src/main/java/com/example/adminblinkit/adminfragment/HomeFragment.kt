@@ -99,7 +99,7 @@ class HomeFragment : Fragment() {
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 val query = s.toString().trim()
                 adapterProduct.filter?.filter(query)
-                Utils.showToast(requireContext(),query)
+               // Utils.showToast(requireContext(),query)
             }
 
             override fun afterTextChanged(s: Editable?) {
@@ -111,23 +111,22 @@ class HomeFragment : Fragment() {
 
     private fun getAllTheProducts(category: String) {
         lifecycleScope.launch {
-           viewModel.fetchAllTheProducts(category).collect{
+            viewModel.fetchAllTheProducts(category).collect {
 
-               if (it.isEmpty()){
-                   binding.rvProducts.visibility=View.GONE
-                   binding.tvText.visibility=View.VISIBLE
-               }
-               else{
-                   binding.rvProducts.visibility=View.VISIBLE
-                   binding.tvText.visibility=View.GONE
-               }
+                if (it.isEmpty()) {
+                    binding.rvProducts.visibility = View.GONE
+                    binding.tvText.visibility = View.VISIBLE
+                } else {
+                    binding.rvProducts.visibility = View.VISIBLE
+                    binding.tvText.visibility = View.GONE
+                }
 
-               adapterProduct = AdapterProduct(::onEditButtonClicked)
-               binding.rvProducts.adapter=adapterProduct
-               adapterProduct.differ.submitList(it)
-               adapterProduct.originalList = it as ArrayList<Product>
-               binding.shimmerViewContainer.visibility = View.GONE
-           }
+                adapterProduct = AdapterProduct(::onEditButtonClicked)
+                binding.rvProducts.adapter = adapterProduct
+                adapterProduct.differ.submitList(it)
+                adapterProduct.originalList = it as ArrayList<Product>
+                binding.shimmerViewContainer.visibility = View.GONE
+            }
         }
     }
 
