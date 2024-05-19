@@ -133,6 +133,8 @@
             android:id="@+id/productCategory"
             android:layout_width="match_parent"
             android:layout_height="57dp"
+            android:enabled="false"
+            android:background="@drawable/et_background"
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
@@ -145,7 +147,7 @@
             <AutoCompleteTextView
                 android:id="@+id/editProductCategoryList"
                 android:layout_width="match_parent"
-                android:layout_height="50dp"
+                android:layout_height="match_parent"
                 android:hint="Product Category"
                 android:enabled="false"
                 android:inputType="none"
@@ -159,6 +161,7 @@
             android:id="@+id/productType"
             android:layout_width="match_parent"
             android:layout_height="57dp"
+            android:enabled="false"
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
@@ -170,7 +173,7 @@
             <AutoCompleteTextView
                 android:id="@+id/editProductTypeList"
                 android:layout_width="match_parent"
-                android:layout_height="50dp"
+                android:layout_height="match_parent"
                 android:hint="Product Type"
                 android:inputType="none"
                 android:enabled="false"
@@ -186,10 +189,11 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
+            android:gravity="center"
             android:orientation="horizontal"
             android:weightSum="2"
-            android:gravity="center"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/productType">
@@ -198,27 +202,27 @@
                 android:id="@+id/editBtn"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Edit"
                 android:layout_marginRight="@dimen/_4sdp"
                 android:layout_weight="1"
+                android:background="@color/yellow"
+                android:text="Edit"
+                android:textAlignment="center"
                 android:textAllCaps="false"
                 android:textColor="@color/black"
-                android:background="@color/yellow"
-                android:textSize="@dimen/_14ssp"
-                android:textAlignment="center"/>
+                android:textSize="@dimen/_14ssp" />
 
             <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/saveBtn"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Save"
                 android:layout_marginLeft="@dimen/_4sdp"
-                android:background="@color/yellow"
                 android:layout_weight="1"
+                android:background="@color/yellow"
+                android:text="Save"
+                android:textAlignment="center"
                 android:textAllCaps="false"
                 android:textColor="@color/black"
-                android:textSize="@dimen/_14ssp"
-                android:textAlignment="center"/>
+                android:textSize="@dimen/_14ssp" />
 
         </LinearLayout>
 

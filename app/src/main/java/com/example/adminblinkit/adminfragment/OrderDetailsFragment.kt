@@ -1,5 +1,6 @@
 package com.example.adminblinkit.adminfragment
 
+import android.graphics.Color
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -131,23 +132,13 @@ class OrderDetailsFragment : Fragment() {
     }
 
     private fun settingStatus(status: Int) {
-//        val viewsToColor = listOf(
-//            binding.iv1, binding.iv2, binding.view1,
-//            binding.iv3, binding.view2, binding.view3, binding.iv4
-//        )
-//
-//        when(status) {
-//            in 0..3 -> {
-//                viewsToColor.take(status + 1).forEach {
-//                    it.backgroundTintList = ContextCompat.getColorStateList(requireContext(), R.color.blue)
-//                }
-//            }
-//        }
+
 
         when (status) {
             0 -> {
                 binding.iv1.backgroundTintList =
                     ContextCompat.getColorStateList(requireContext(), R.color.blue)
+                binding.tv1.setTextColor(ContextCompat.getColor(requireContext(),R.color.blue))
             }
 
             1 -> {
@@ -157,6 +148,9 @@ class OrderDetailsFragment : Fragment() {
                     ContextCompat.getColorStateList(requireContext(), R.color.blue)
                 binding.view1.backgroundTintList =
                     ContextCompat.getColorStateList(requireContext(), R.color.blue)
+
+                binding.tv1.setTextColor(ContextCompat.getColor(requireContext(),R.color.blue))
+                binding.tv2.setTextColor(ContextCompat.getColor(requireContext(),R.color.blue))
             }
 
             2 -> {
@@ -170,6 +164,10 @@ class OrderDetailsFragment : Fragment() {
                     ContextCompat.getColorStateList(requireContext(), R.color.blue)
                 binding.view2.backgroundTintList =
                     ContextCompat.getColorStateList(requireContext(), R.color.blue)
+
+                binding.tv1.setTextColor(ContextCompat.getColor(requireContext(),R.color.blue))
+                binding.tv2.setTextColor(ContextCompat.getColor(requireContext(),R.color.blue))
+                binding.tv3.setTextColor(ContextCompat.getColor(requireContext(),R.color.blue))
             }
 
             3 -> {
@@ -187,6 +185,11 @@ class OrderDetailsFragment : Fragment() {
                     ContextCompat.getColorStateList(requireContext(), R.color.blue)
                 binding.iv4.backgroundTintList =
                     ContextCompat.getColorStateList(requireContext(), R.color.blue)
+
+                binding.tv1.setTextColor(ContextCompat.getColor(requireContext(),R.color.blue))
+                binding.tv2.setTextColor(ContextCompat.getColor(requireContext(),R.color.blue))
+                binding.tv3.setTextColor(ContextCompat.getColor(requireContext(),R.color.blue))
+                binding.tv4.setTextColor(ContextCompat.getColor(requireContext(),R.color.blue))
             }
         }
     }

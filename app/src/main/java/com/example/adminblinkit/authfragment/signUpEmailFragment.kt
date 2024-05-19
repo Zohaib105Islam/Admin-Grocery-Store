@@ -18,6 +18,8 @@ import com.example.adminblinkit.databinding.FragmentSignUpEmailBinding
 import com.example.adminblinkit.models.Users
 import com.example.adminblinkit.utils.Utils
 import com.example.adminblinkit.viewmodels.AuthViewModel
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.launch
 
 class signUpEmailFragment : Fragment() {
@@ -47,9 +49,6 @@ class signUpEmailFragment : Fragment() {
         binding.gotoLogin.setOnClickListener{
             findNavController().navigate(R.id.action_signUpEmailFragment_to_signInEmailFragment)
         }
-
-
-
 
         return binding.root
     }
@@ -89,38 +88,48 @@ class signUpEmailFragment : Fragment() {
             binding.signupPhone.error="Enter phone"
         }
         else{
-            lifecycleScope.launch {
-                viewModel.apply {
-                    createUserWithEmail(email, password, users)
-                    lifecycleScope.launch {
-                        isSignInSuccessfully.apply {
-                            Utils.showDialog(requireContext(),"Sign Up...")
 
-                            if (true) {
-                                Handler(Looper.getMainLooper()).postDelayed(Runnable {
-                                    Utils.hideDialog()
-                                    Utils.showToast(requireContext(), "Signup Successfully...!!")
-                                    startActivity(Intent(requireContext(), MainActivity::class.java))
-                                    requireActivity().finish()
-                                },2000)
-                            }
-                            else {
-                                Utils.hideDialog()
-                                Utils.showToast(requireContext(), "Signup Error...")
-                            }
+            Utils.showDialog(requireContext(),"Sign Up...")
+            createUserWithEmail(email,password,users)
 
-
-
-                        }
-                    }
-                }
-
-
-            }
         }
 
 
 
+    }
+
+    fun createUserWithEmail(email: String, password: String, users: Users) {
+
+        FirebaseMessaging.getInstance().token.addOnCompleteListener{
+            users.adminToken=it.result
+
+            Utils.getAuthInstance().createUserWithEmailAndPassword(email, password)
+                .addOnSuccessListener {
+
+                    users.uid=Utils.currentUser()
+
+                    Handler(Looper.getMainLooper()).postDelayed(Runnable {
+                        Utils.hideDialog()
+                        Utils.showToast(requireContext(), "Signup Successfully...!!")
+                        startActivity(Intent(requireContext(), MainActivity::class.java))
+                        requireActivity().finish()
+                    },2000)
+
+//                    FirebaseDatabase.getInstance().getReference("AllUsers")
+//                        .child(Utils.currentUser()!!).child("UserInfo").setValue(users)
+                    FirebaseDatabase.getInstance().getReference("Admins")
+                        .child(Utils.currentUser()!!).child("AdminInfo").setValue(users)
+
+                    Log.d("GGG", "createUserWithEmail:${users.uid}")
+
+                }
+                .addOnFailureListener(){
+                    Utils.hideDialog()
+                    Utils.showToast(requireContext(), "Signup Error ${it.toString()}")
+
+                    Log.d("Error sign up", "Error sign up  : "+it.toString())
+                }
+        }
     }
 
 

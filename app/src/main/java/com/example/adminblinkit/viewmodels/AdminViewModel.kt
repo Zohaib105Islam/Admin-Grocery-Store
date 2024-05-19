@@ -35,11 +35,20 @@ class AdminViewModel : ViewModel() {
     private val _isImagesUploaded = MutableStateFlow(false)
     var isImagesUploaded: StateFlow<Boolean> = _isImagesUploaded
 
+    private val _isImagesDelete = MutableStateFlow(false)
+    var isImagesDelete: StateFlow<Boolean> = _isImagesDelete
+
     private val _downloadsUrls = MutableStateFlow<ArrayList<String?>>(arrayListOf())
     var downloadsUrls: StateFlow<ArrayList<String?>> = _downloadsUrls
 
+
+
     private val _isProductSaved = MutableStateFlow(false)
     var isProductSaved: StateFlow<Boolean> = _isProductSaved
+
+    private val _isProductDelete = MutableStateFlow(false)
+    var isProductDelete: StateFlow<Boolean> = _isProductDelete
+
 
     fun saveImageInDB(imageUri: ArrayList<Uri>) {
         val downloadUrls = ArrayList<String?>()
@@ -60,7 +69,22 @@ class AdminViewModel : ViewModel() {
                 }
             }
         }
-
+    }
+    fun deleteImageInDB(imageUri: ArrayList<String?>?){
+        // Implement deletion from Storage here
+        // For example:
+        val storageRef = FirebaseStorage.getInstance().reference
+        imageUri?.forEach { imageUrl ->
+            val imageRef = storageRef.child(Utils.currentUser().toString())
+                .child("images").child(UUID.randomUUID().toString())
+            imageRef.delete().addOnSuccessListener {
+                // Image deleted successfully
+                _isImagesDelete.value = true
+            }.addOnFailureListener { exception ->
+                // Handle any errors
+                _isImagesDelete.value = false
+            }
+        }
     }
 
     fun saveProduct(product: Product) {
@@ -99,10 +123,6 @@ class AdminViewModel : ViewModel() {
                                                     .addOnSuccessListener {
                                                         _isProductSaved.value = true
 
-                                                        Log.d(
-                                                            "EEE",
-                                                            " Admin User : ${product.adminUid}"
-                                                        )
                                                     }
 
                                             }
@@ -113,6 +133,56 @@ class AdminViewModel : ViewModel() {
                     }
 
             }
+    }
+
+    fun deleteProductFromDatabase(product: Product) {
+        // Implement deletion from Realtime Database here
+        // For example:
+        FirebaseDatabase.getInstance().getReference("Admins").child(Utils.currentUser()!!)
+            .child("AllProducts").child(product.productRandomId!!).removeValue()
+            .addOnSuccessListener {
+                FirebaseDatabase.getInstance().getReference("Admins").child(Utils.currentUser()!!)
+                    .child("ProductCategory/${product.productCategory}")
+                    .child(product.productRandomId!!)
+                    .removeValue()
+                    .addOnSuccessListener {
+                        FirebaseDatabase.getInstance().getReference("Admins")
+                            .child(Utils.currentUser()!!)
+                            .child("ProductType/${product.productType}")
+                            .child(product.productRandomId!!)
+                            .removeValue()
+                            .addOnSuccessListener {
+
+// product delete in All Product details node
+                                FirebaseDatabase.getInstance().getReference("AllProductsDetails")
+                                    .child("AllProducts").child(product.productRandomId!!)
+                                    .removeValue()
+                                    .addOnSuccessListener {
+                                        FirebaseDatabase.getInstance()
+                                            .getReference("AllProductsDetails")
+                                            .child("ProductCategory/${product.productCategory}")
+                                            .child(product.productRandomId!!)
+                                            .removeValue()
+                                            .addOnSuccessListener {
+                                                FirebaseDatabase.getInstance()
+                                                    .getReference("AllProductsDetails")
+                                                    .child("ProductType/${product.productType}")
+                                                    .child(product.productRandomId!!)
+                                                    .removeValue()
+                                                    .addOnSuccessListener {
+                                                        _isProductDelete.value = true
+
+                                                    }
+
+                                            }
+
+                                    }
+                            }
+
+                    }
+
+            }
+
     }
 
     fun getAllOrders(): Flow<List<Orders>> = callbackFlow {
@@ -177,6 +247,8 @@ class AdminViewModel : ViewModel() {
 
 
                     }
+                    // Sort products by timestamp in descending order
+                   // products.sortByDescending { it?.timestamp }
                     trySend(products)
                 }
 
@@ -219,13 +291,61 @@ class AdminViewModel : ViewModel() {
 
     fun savingUpdateProducts(product: Product) {
 
-        productRef.child("AllProducts/${product.productRandomId}").setValue(product)
-        productRef.child("ProductCategory /${product.productCategory}")
-            .child(product.productRandomId!!)
-            .setValue(product)
-        // productRef.child("ProductCategory").child(product.productCategory!!).child(product.itemPushKey!!).setValue(product)
-        productRef.child("ProductType /${product.productType}").child(product.productRandomId!!)
-            .setValue(product)
+
+        //  product Store in admin node
+        FirebaseDatabase.getInstance().getReference("Admins").child(Utils.currentUser()!!)
+            .child("AllProducts").child(product.productRandomId!!).setValue(product)
+            .addOnSuccessListener {
+                FirebaseDatabase.getInstance().getReference("Admins").child(Utils.currentUser()!!)
+                    .child("ProductCategory/${product.productCategory}")
+                    .child(product.productRandomId!!)
+                    .setValue(product)
+                    .addOnSuccessListener {
+                        FirebaseDatabase.getInstance().getReference("Admins")
+                            .child(Utils.currentUser()!!)
+                            .child("ProductType/${product.productType}")
+                            .child(product.productRandomId!!)
+                            .setValue(product)
+                            .addOnSuccessListener {
+
+// product store in All Product details node
+                                FirebaseDatabase.getInstance().getReference("AllProductsDetails")
+                                    .child("AllProducts").child(product.productRandomId!!)
+                                    .setValue(product)
+                                    .addOnSuccessListener {
+                                        FirebaseDatabase.getInstance()
+                                            .getReference("AllProductsDetails")
+                                            .child("ProductCategory/${product.productCategory}")
+                                            .child(product.productRandomId!!)
+                                            .setValue(product)
+                                            .addOnSuccessListener {
+                                                FirebaseDatabase.getInstance()
+                                                    .getReference("AllProductsDetails")
+                                                    .child("ProductType/${product.productType}")
+                                                    .child(product.productRandomId!!)
+                                                    .setValue(product)
+                                                    .addOnSuccessListener {
+                                                        _isProductSaved.value = true
+
+                                                    }
+
+                                            }
+
+                                    }
+                            }
+
+                    }
+
+            }
+
+
+//        productRef.child("AllProducts/${product.productRandomId}").setValue(product)
+//        productRef.child("ProductCategory /${product.productCategory}")
+//            .child(product.productRandomId!!)
+//            .setValue(product)
+//        // productRef.child("ProductCategory").child(product.productCategory!!).child(product.itemPushKey!!).setValue(product)
+//        productRef.child("ProductType /${product.productType}").child(product.productRandomId!!)
+//            .setValue(product)
     }
 
     fun updateOrderStatus(orderId: String, status: Int) {

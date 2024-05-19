@@ -13,4 +13,5 @@ data class Product(
     var itemCount : Int? = null,
     var adminUid : String? = null,
     var productImageUris : ArrayList<String?> ? = null,
+    var timestamp: Long? = null,
 )

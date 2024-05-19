@@ -50,4 +50,9 @@ object Utils {
         return newItemKey!!
     }
 
+    fun timeStamp(): Long {
+        val timestamp = System.currentTimeMillis()
+        return timestamp
+    }
+
 }

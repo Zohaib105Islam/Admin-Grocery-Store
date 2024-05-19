@@ -1,5 +1,6 @@
 package com.example.adminblinkit.adminfragment
 
+
 import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
@@ -23,7 +24,6 @@ import com.example.adminblinkit.models.Product
 import com.example.adminblinkit.utils.Constants
 import com.example.adminblinkit.utils.Utils
 import com.example.adminblinkit.viewmodels.AdminViewModel
-import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
 
 class HomeFragment : Fragment() {
@@ -91,29 +91,22 @@ class HomeFragment : Fragment() {
     }
 
     private fun searchProducts() {
-        binding.etSearch.addTextChangedListener(object  : TextWatcher{
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
 
-            }
+        binding.etSearch.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                val query = s.toString().trim()
-                adapterProduct.filter?.filter(query)
-               // Utils.showToast(requireContext(),query)
+                adapterProduct.filter.filter(s)
             }
 
-            override fun afterTextChanged(s: Editable?) {
-
-            }
-
+            override fun afterTextChanged(s: Editable?) {}
         })
     }
 
     private fun getAllTheProducts(category: String) {
         lifecycleScope.launch {
-            viewModel.fetchAllTheProducts(category).collect {
-
-                if (it.isEmpty()) {
+            viewModel.fetchAllTheProducts(category).collect { products ->
+                if (products.isEmpty()) {
                     binding.rvProducts.visibility = View.GONE
                     binding.tvText.visibility = View.VISIBLE
                 } else {
@@ -121,10 +114,9 @@ class HomeFragment : Fragment() {
                     binding.tvText.visibility = View.GONE
                 }
 
-                adapterProduct = AdapterProduct(::onEditButtonClicked)
+                adapterProduct = AdapterProduct(::onEditButtonClicked,::onDeleteButtonClicked)
+                adapterProduct.submitList(products)
                 binding.rvProducts.adapter = adapterProduct
-                adapterProduct.differ.submitList(it)
-                adapterProduct.originalList = it as ArrayList<Product>
                 binding.shimmerViewContainer.visibility = View.GONE
             }
         }
@@ -153,8 +145,8 @@ val editProduct = EditProductLayoutBinding.inflate(LayoutInflater.from(requireCo
                 editProductUnit.isEnabled=true
                 editProductPrice.isEnabled=true
                 editProductNoStock.isEnabled=true
-                editProductCategoryList.isEnabled=true
-                editProductTypeList.isEnabled=true
+//                editProductCategoryList.isEnabled=true
+//                editProductTypeList.isEnabled=true
             }
         }
 
@@ -206,6 +198,56 @@ val editProduct = EditProductLayoutBinding.inflate(LayoutInflater.from(requireCo
     private fun onCategoryClicked(category: Category){
 
         getAllTheProducts(category.category)
+
+    }
+
+    private fun onDeleteButtonClicked(product: Product) {
+
+        val builder= androidx.appcompat.app.AlertDialog.Builder(requireContext())
+        val alertDialog=builder.create()
+        builder.setTitle("Delete ")
+            .setMessage("Do you want to delete this Product ?")
+            .setPositiveButton("Yes"){_,_->
+
+                Utils.showDialog(requireContext(),"Deleting Product")
+
+                // Delete from Storage
+                viewModel.deleteImageInDB(product.productImageUris)
+                // Delete from Realtime Database
+                viewModel.deleteProductFromDatabase(product)
+
+                lifecycleScope.launch {
+                    viewModel.isImagesDelete.collect{
+                        if (true){
+                            viewModel.isProductDelete.collect{
+                                if (true){
+                                   Utils.hideDialog()
+                                }
+                                else{
+                                    Utils.hideDialog()
+                                    Utils.showToast(requireContext(),"Something went wrong")
+                                }
+                            }
+                        }
+                        else{
+                            Utils.hideDialog()
+                            Utils.showToast(requireContext(),"Something went wrong")
+                        }
+                    }
+
+                }
+
+
+                // Notify the adapter
+                adapterProduct.notifyDataSetChanged()
+
+            }
+            .setNegativeButton("No"){_,_->
+                alertDialog.dismiss()
+            }
+            .show()
+            .setCancelable(false)
+
 
     }
 

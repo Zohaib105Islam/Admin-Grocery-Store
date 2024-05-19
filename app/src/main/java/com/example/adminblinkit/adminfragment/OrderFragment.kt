@@ -46,6 +46,16 @@ class OrderFragment : Fragment() {
         lifecycleScope.launch {
             viewModel.getAllOrders().collect { orderList ->
 
+                if (orderList.isEmpty()){
+                    binding.rvOrders.visibility=View.GONE
+                    binding.tvText.visibility=View.VISIBLE
+                }
+                else{
+                    binding.rvOrders.visibility=View.VISIBLE
+                    binding.tvText.visibility=View.GONE
+                }
+
+
                 if (orderList.isNotEmpty()) {
                     val orderedList = ArrayList<OrderedItems>()
                     for (orders in orderList) {
@@ -75,6 +85,7 @@ class OrderFragment : Fragment() {
                     binding.rvOrders.adapter=adapterOrders
                     adapterOrders.differ.submitList(orderedList)
                 }
+                binding.shimmerViewContainer.visibility = View.GONE
             }
         }
 
@@ -87,10 +98,6 @@ class OrderFragment : Fragment() {
         bundle.putString("orderId",orderedItems.orderId)
         bundle.putString("userAddress",orderedItems.userAddress)
         bundle.putString("orderingUserUid",orderedItems.orderingUserUid)
-
-
-        Utils.showToast(requireContext(), "Order Id: ${ orderedItems.orderId!! }  User id: ${orderedItems.orderingUserUid}")
-
 
 
         findNavController().navigate(R.id.action_orderFragment_to_orderDetailsFragment,bundle)

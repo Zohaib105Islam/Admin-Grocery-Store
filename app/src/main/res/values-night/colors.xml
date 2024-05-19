@@ -13,7 +13,11 @@
 
     <color name="iv_bg">#5A7175</color>
 
-    <color name="blue">#078CC7</color>
+    <color name="blue">#5EC2EF</color>
     <color name="orange">#FF9800</color>
+
+    <color name="lightgrey">#5A7175</color>
+
+    <color name="shimmer">#DDDDDD</color>
 
 </resources>
